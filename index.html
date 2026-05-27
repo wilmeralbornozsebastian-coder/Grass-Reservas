@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRASS SPORT</title>
+
+    <link rel="stylesheet" href="grass.css">
+</head>
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>⚽ GRASS SPORT</h1>
+
+        <p class="subtitulo">
+            Reserva tu cancha fácil y rápido
+        </p>
+
+        <div class="formulario">
+
+            <input type="text" id="nombre" placeholder="Ingresa tu nombre">
+
+            <select id="deporte">
+
+                <option value="">Selecciona deporte</option>
+
+                <option value="Fulbito">
+                    ⚽ Fulbito
+                </option>
+
+                <option value="Voley">
+                    🏐 Voley
+                </option>
+
+            </select>
+
+            <input type="date" id="fecha">
+
+            <select id="hora">
+
+                <option value="">Selecciona hora</option>
+
+                <option>7:00 AM</option>
+                <option>8:00 AM</option>
+                <option>9:00 AM</option>
+                <option>10:00 AM</option>
+                <option>11:00 AM</option>
+                <option>12:00 PM</option>
+                <option>1:00 PM</option>
+                <option>2:00 PM</option>
+                <option>3:00 PM</option>
+                <option>4:00 PM</option>
+                <option>5:00 PM</option>
+                <option>6:00 PM</option>
+                <option>7:00 PM</option>
+                <option>8:00 PM</option>
+                <option>9:00 PM</option>
+                <option>10:00 PM</option>
+                <option>11:00 PM</option>
+
+            </select>
+
+            <button onclick="reservar()">
+
+                RESERVAR AHORA
+
+            </button>
+
+        </div>
+
+        <div class="reservas">
+
+            <h2>📋 Reservaciones</h2>
+
+            <ul id="listaReservas"></ul>
+
+        </div>
+
+    </div>
+
+
+
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs
+}
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDr-BxGW9llnZxqCD5YkGjZ-giAgwtUFXw",
+
+  authDomain: "grass-chavez-reservaciones.firebaseapp.com",
+
+  projectId: "grass-chavez-reservaciones",
+
+  storageBucket: "grass-chavez-reservaciones.firebasestorage.app",
+
+  messagingSenderId: "221118366636",
+
+  appId: "1:221118366636:web:82feb17afcbb709a407009",
+
+  measurementId: "G-1VZ7B621ED"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+window.reservar = async function () {
+
+    let nombre = document.getElementById("nombre").value;
+
+    let deporte = document.getElementById("deporte").value;
+
+    let fecha = document.getElementById("fecha").value;
+
+    let hora = document.getElementById("hora").value;
+
+    if(nombre == "" || deporte == "" || fecha == "" || hora == "") {
+
+        alert("⚠️ Completa todos los campos");
+
+        return;
+    }
+
+    const querySnapshot = await getDocs(collection(db, "reservas"));
+
+    let ocupado = false;
+
+    querySnapshot.forEach((doc) => {
+
+        let data = doc.data();
+
+        if(
+            data.fecha.trim().toLowerCase() === fecha.trim().toLowerCase() &&
+            data.hora.trim().toLowerCase() === hora.trim().toLowerCase() &&
+            data.deporte.trim().toLowerCase() === deporte.trim().toLowerCase()
+        ){
+            ocupado = true;
+        }
+
+    });
+
+    if(ocupado){
+
+        alert("❌ Horario ocupado");
+        
+        return;
+
+    } else {
+
+        await addDoc(collection(db, "reservas"), {
+
+            nombre: nombre,
+            deporte: deporte,
+            fecha: fecha,
+            hora: hora
+
+        });
+
+        let lista = document.getElementById("listaReservas");
+
+        let item = document.createElement("li");
+
+        item.innerHTML = `
+            <span>👤 ${nombre}</span>
+            <span>🏟️ ${deporte}</span>
+            <span>📅 ${fecha}</span>
+            <span>⏰ ${hora}</span>
+        `;
+
+        lista.appendChild(item);
+
+        alert("✅ Reserva guardada online");
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
